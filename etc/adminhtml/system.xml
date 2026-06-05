@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="etechflow" translate="label" sortOrder="400">
+            <label>Etechflow</label>
+        </tab>
+        <section id="etechflow_canonical" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Canonical &amp; Hreflang</label>
+            <tab>etechflow</tab>
+            <resource>Etechflow_CanonicalHreflang::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Module</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Master switch for canonical + hreflang output.</comment>
+                </field>
+            </group>
+            <group id="canonical" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Canonical Tags</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Canonical</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Tip: turn OFF Magento's own canonical (Catalog &gt; Catalog &gt; Search Engine Optimization) to avoid duplicates — this module dedupes them anyway.</comment>
+                </field>
+                <field id="product" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>On product pages</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="category" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>On category pages</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="cms" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>On CMS pages</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="strip_query" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Strip query parameters</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Canonicalise ?filter / ?sort / tracking variants to the clean URL.</comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="paginated_to_self" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Self-referencing pagination</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Yes: page 2+ canonicalises to itself (?p=N). No: every page canonicalises to page 1.</comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+            </group>
+            <group id="hreflang" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Hreflang</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1">
+                    <label>Enable Hreflang</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Outputs rel="alternate" hreflang links across active store views. Only useful with 2+ store views / locales.</comment>
+                </field>
+                <field id="x_default_store" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                    <label>x-default store view ID</label>
+                    <comment>Store view ID to mark as hreflang="x-default" (the fallback). Leave blank for none.</comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="mapping" translate="label comment" type="textarea" sortOrder="30" showInDefault="1">
+                    <label>Hreflang overrides</label>
+                    <comment><![CDATA[One per line: <b>storeId:code</b> (e.g. <b>1:en-gb</b>). Unlisted stores fall back to their Locale (Stores &gt; Config &gt; General &gt; Locale Options).]]></comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

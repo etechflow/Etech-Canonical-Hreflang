@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <etechflow_canonical>
+            <general>
+                <enabled>0</enabled>
+            </general>
+            <canonical>
+                <enabled>1</enabled>
+                <product>1</product>
+                <category>1</category>
+                <cms>1</cms>
+                <strip_query>1</strip_query>
+                <paginated_to_self>1</paginated_to_self>
+            </canonical>
+            <hreflang>
+                <enabled>0</enabled>
+                <x_default_store/>
+                <mapping/>
+            </hreflang>
+        </etechflow_canonical>
+    </default>
+</config>
