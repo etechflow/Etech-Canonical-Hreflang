@@ -1,0 +1,84 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Etechflow\CanonicalHreflang\Controller\Adminhtml\License;
+
+use Etechflow\CanonicalHreflang\Model\LicenseValidator;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\HTTP\Client\CurlFactory;
+
+/**
+ * Starts checkout by delegating to the eTechFlow licensing portal. The portal
+ * creates the checkout session using ITS OWN payment keys and returns the
+ * checkout URL. No payment keys live in Magento.
+ */
+class Checkout extends Action
+{
+    public const ADMIN_RESOURCE = 'Etechflow_CanonicalHreflang::config';
+
+    private const MODULE_ID = 'canonical-hreflang';
+
+    public function __construct(
+        Context $context,
+        private readonly CurlFactory $curlFactory,
+        private readonly LicenseValidator $licenseValidator
+    ) {
+        parent::__construct($context);
+    }
+
+    public function execute(): ResultInterface
+    {
+        $plan   = trim((string) $this->getRequest()->getPost('plan', ''));
+        $name   = trim((string) $this->getRequest()->getPost('name', ''));
+        $email  = trim((string) $this->getRequest()->getPost('email', ''));
+        $domain = $this->licenseValidator->getCurrentHost();
+
+        $gate = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('canonicalhreflang/license/gate');
+
+        if (!$plan) {
+            $this->messageManager->addErrorMessage(__('Invalid plan selected.'));
+            return $gate;
+        }
+        if (!$name || !$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->messageManager->addErrorMessage(__('Please enter a valid name and email address.'));
+            return $gate;
+        }
+
+        $payload = json_encode([
+            'plan'             => $plan,
+            'name'             => $name,
+            'email'            => $email,
+            'domain'           => $domain,
+            'module'           => self::MODULE_ID,
+            'magento_callback' => $this->getUrl('canonicalhreflang/license/activated'),
+            'magento_cancel'   => $this->getUrl('canonicalhreflang/license/gate'),
+        ]);
+
+        try {
+            $curl = $this->curlFactory->create();
+            $curl->setTimeout(20);
+            $curl->addHeader('Content-Type', 'application/json');
+            $curl->addHeader('Accept', 'application/json');
+            $curl->addHeader('X-ETF-License-Token', 'lcsk_8f3b9d2a7c14e605b9af2e7c1d8043f6');
+            $curl->post('https://module.etechflow.com/api/license/checkout', $payload);
+            $status = (int) $curl->getStatus();
+            $body   = (string) $curl->getBody();
+        } catch (\Throwable $e) {
+            $this->messageManager->addErrorMessage(__('Could not reach the licensing portal. Please try again.'));
+            return $gate;
+        }
+
+        $data = json_decode($body, true);
+        if ($status === 200 && !empty($data['url'])) {
+            return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setUrl((string) $data['url']);
+        }
+
+        $err = is_array($data) && !empty($data['error']) ? $data['error'] : ('Portal returned status ' . $status);
+        $this->messageManager->addErrorMessage(__('Checkout error: %1', $err));
+        return $gate;
+    }
+}

@@ -10,8 +10,10 @@ class Config
 {
     private const P = 'etechflow_canonical/';
 
-    public function __construct(private readonly ScopeConfigInterface $scopeConfig)
-    {
+    public function __construct(
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly LicenseValidator $licenseValidator
+    ) {
     }
 
     private function flag(string $path, ?int $storeId = null): bool
@@ -21,7 +23,11 @@ class Config
 
     public function isEnabled(?int $storeId = null): bool
     {
-        return $this->flag('general/enabled', $storeId);
+        // Single storefront chokepoint: the head-links plugin and both resolvers
+        // all gate on this, so an invalid / suspended / expired / wrong-domain
+        // licence fully blocks canonical + hreflang output. The licence result is
+        // cached (~30 s), so it costs at most one portal call per half-minute.
+        return $this->flag('general/enabled', $storeId) && $this->licenseValidator->isValid();
     }
 
     public function isCanonicalEnabled(?int $storeId = null): bool
