@@ -275,6 +275,48 @@ class LicenseValidator
         return (bool) $features[$flag];
     }
 
+    /**
+     * Live licence state from the portal (cached 60 s), for admin messaging.
+     * One of: 'active', 'suspended', 'blocked', 'expired', 'invalid', 'none'.
+     * NOTE: this is read-only — it never clears or rewrites the stored key.
+     */
+    public function getLicenseState(): string
+    {
+        $key = $this->getConfiguredKey();
+        if ($key === '') {
+            return 'none';
+        }
+        $host = $this->getCurrentHost();
+        if (!$this->isProductionEnvironment() || ($host !== '' && $this->isDevelopmentHost($host))) {
+            return 'active';
+        }
+        if (!str_starts_with($key, 'SP-')) {
+            return $this->isValid() ? 'active' : 'invalid';
+        }
+        $cacheKey = self::CACHE_PREFIX . 'state_' . md5($host . ':' . $key);
+        $cached   = $this->cache->load($cacheKey);
+        if ($cached !== false) {
+            return (string) $cached;
+        }
+        $base  = rtrim(str_replace('/license/validate', '', $this->getPortalUrl()), '/');
+        $url   = $base . '/license/status?platform=magento&module=' . self::MODULE_ID
+               . '&domain=' . urlencode($host) . '&license_key=' . urlencode($key);
+        $state = 'invalid';
+        try {
+            $this->curl->setTimeout(8);
+            $this->curl->addHeader('Accept', 'application/json');
+            $this->curl->get($url);
+            $d = json_decode((string) $this->curl->getBody(), true);
+            if (is_array($d) && !empty($d['state'])) {
+                $state = (string) $d['state'];
+            }
+        } catch (\Throwable) {
+            $state = 'invalid';
+        }
+        $this->cache->save($state, $cacheKey, [self::CACHE_TAG], 60);
+        return $state;
+    }
+
     private function isDevelopmentHost(string $host): bool
     {
         if ($host === 'localhost' || str_starts_with($host, '127.')) {
