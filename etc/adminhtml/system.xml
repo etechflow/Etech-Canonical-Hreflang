@@ -8,6 +8,10 @@
             <label>Canonical &amp; Hreflang</label>
             <tab>etechflow</tab>
             <resource>Etechflow_CanonicalHreflang::config</resource>
+            <group id="module_status" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Module Status</label>
+                <frontend_model>Etechflow\CanonicalHreflang\Block\Adminhtml\System\Config\ModuleStatus</frontend_model>
+            </group>
             <group id="license" translate="label" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>License</label>
                 <field id="license_key" translate="label comment" sortOrder="10" type="text" showInDefault="1" showInWebsite="0" showInStore="0">

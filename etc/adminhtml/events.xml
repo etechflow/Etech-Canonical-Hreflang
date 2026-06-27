@@ -1,15 +1,12 @@
 <?xml version="1.0"?>
-<!--
-/**
- * Admin licence banner: on every admin page, if the module is licensed but the
- * licence is suspended/blocked/expired/invalid, show a warning message telling
- * the merchant the module is frozen and how to restore access. The key is never
- * removed — enforcement is purely the storefront freeze (Config::isEnabled()).
- */
--->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="controller_action_predispatch">
-        <observer name="etechflow_canonical_admin_license_banner" instance="Etechflow\CanonicalHreflang\Observer\AdminLicenseBanner"/>
+    <event name="controller_action_predispatch_etechflow_canonical_license_gate">
+        <observer name="etechflow_rs_update_notification_gate"
+                  instance="Etechflow\CanonicalHreflang\Observer\AddUpdateNotification"/>
+    </event>
+    <event name="controller_action_predispatch_adminhtml_system_config_edit">
+        <observer name="etechflow_rs_update_notification_sysconfig"
+                  instance="Etechflow\CanonicalHreflang\Observer\AddUpdateNotification"/>
     </event>
 </config>
