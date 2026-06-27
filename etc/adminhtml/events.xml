@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="controller_action_predispatch_etechflow_canonical_license_gate">
+    <event name="controller_action_predispatch_canonicalhreflang_license_gate">
         <observer name="etechflow_rs_update_notification_gate"
                   instance="Etechflow\CanonicalHreflang\Observer\AddUpdateNotification"/>
     </event>
